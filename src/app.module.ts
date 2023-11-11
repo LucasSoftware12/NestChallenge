@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module'; // Importa el módulo "users"
+import { UsersModule } from './users/users.module';
 import { RabbitService } from './rabbit/rabbit.service';
 
 @Module({
-  imports: [UsersModule], // Agrega el módulo "users"
-  providers: [RabbitService], // Agregar RabbitService como un proveedor
+  imports: [UsersModule],
+  providers: [RabbitService],
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { RabbitService } from '../rabbit/rabbit.service';
+import { RabbitService } from './../rabbit/rabbit.service';
 
 @Controller('users')
 export class UsersController {
@@ -10,13 +10,10 @@ export class UsersController {
   ) {}
 
   @Get()
-  async getUsersAndPublishEvenUsers() {
-    // Obtener todos los usuarios
-    const allUsers = await this.usersService.getFilteredAndSortedUsers();
+  async getUsers() {
+    const users = await this.usersService.getUsersFromAPI();
 
-    // Publicar usuarios con ID par en RabbitMQ
-    await this.rabbitService.publishEvenUsers(allUsers);
-
-    return allUsers; // Devolver todos los usuarios
+    await this.rabbitService.publishEvenUsersToRabbitMQ(users);
+    return users;
   }
 }

@@ -1,24 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { RabbitService } from './../rabbit/rabbit.service';
 
 @Injectable()
 export class UsersService {
-  async getFilteredAndSortedUsers() {
-    try {
-      const apiUrl = 'https://jsonplaceholder.typicode.com/users';
-      const response = await axios.get(apiUrl);
+  constructor(private readonly rabbitService: RabbitService) {}
 
-      const users = response.data;
-      const filteredUsers = users.map((user: any) => {
-        const { address, ...userWithoutAddress } = user;
-        return userWithoutAddress;
-      });
+  async getUsersFromAPI() {
+    const response = await axios.get(
+      'https://jsonplaceholder.typicode.com/users',
+    );
+    const users = response.data.map((user: any) => {
+      const { address, ...userWithoutAddress } = user;
+      return userWithoutAddress;
+    });
+    return users.sort((a, b) => b.id - a.id);
+  }
 
-      const sortedUsers = filteredUsers.sort((a, b) => b.id - a.id);
-      return sortedUsers;
-    } catch (error) {
-      throw new Error('No se pudieron obtener los usuarios');
-    }
+  async publishEvenUsersToRabbitMQ() {
+    const users = await this.getUsersFromAPI();
+    const evenUsers = users.filter((user: any) => user.id % 2 === 0);
+    this.rabbitService.publishEvenUsersToRabbitMQ(evenUsers);
   }
 }
